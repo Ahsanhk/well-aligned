@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { API_ERRORS } from '@/constants/api-errors';
+import { API_TOKEN_NAME_MAX_LENGTH, RUN_MAX_TODOS, RUN_PROMPT_MAX_LENGTH } from '@/constants/claude-link';
 import { MEETING_TITLE_MAX_LENGTH, TRANSCRIPT_FORMAT_VALUES } from '@/constants/meeting';
 import { EXTRA_INSTRUCTIONS_MAX_LENGTH, MAX_TODOS_PER_PROMPT } from '@/constants/prompt';
 import {
@@ -235,3 +236,26 @@ export function meetingAnalysisResponseJsonSchema() {
   const { $schema: _unsupported, ...schema } = z.toJSONSchema(meetingAnalysisSchema);
   return schema;
 }
+
+export const apiTokenInputSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(API_TOKEN_NAME_MAX_LENGTH),
+});
+
+export const startRunSchema = z.object({
+  projectId: z.string().trim().min(1),
+  todoIds: z
+    .array(z.string().trim().min(1))
+    .min(1, 'Select at least one todo')
+    .max(RUN_MAX_TODOS)
+    .refine((ids) => new Set(ids).size === ids.length, 'Todos must be unique'),
+  mode: z.enum(['terminal', 'queue']),
+  prompt: z.string().trim().min(1, 'Prompt is required').max(RUN_PROMPT_MAX_LENGTH),
+});
+
+export const completeRunSchema = z.object({
+  summary: z.string().trim().max(20000).optional(),
+});
+
+export const terminalTicketSchema = z.object({
+  runId: z.string().trim().min(1),
+});

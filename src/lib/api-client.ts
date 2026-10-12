@@ -3,6 +3,12 @@ import { TOAST_COPY } from '@/constants/toast';
 import { ownerMeetingsApi, ownerTodosApi } from '@/lib/owner';
 import type {
   AcceptSuggestionsRequest,
+  ApiToken,
+  CreatedApiToken,
+  IntegrationStatus,
+  Run,
+  StartRunRequest,
+  TerminalTicket,
   ItemOwner,
   ProjectGroup,
   ProjectGroupInput,
@@ -43,9 +49,18 @@ async function readError(response: Response) {
   return `${TOAST_COPY.genericError} (${response.status})`;
 }
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, { cache: 'no-store', ...init });
-  if (!response.ok) throw new Error(await readError(response));
+  if (!response.ok) throw new ApiError(await readError(response), response.status);
   return (await response.json()) as T;
 }
 
@@ -63,6 +78,20 @@ export const api = {
   listTodos: (owner: ItemOwner) => request<Todo[]>(ownerTodosApi(owner)),
   createTodo: (owner: ItemOwner, input: TodoInput) => sendJson<Todo>(ownerTodosApi(owner), 'POST', input),
   moveTodo: (todoId: string, target: TodoMoveTarget) => sendJson<Todo>(API_ROUTES.todoMove(todoId), 'POST', target),
+  createRun: (body: StartRunRequest) => sendJson<Run>(API_ROUTES.runs, 'POST', body),
+  listActiveRuns: (projectId?: string) => {
+    const query = new URLSearchParams({ active: '1' });
+    if (projectId) query.set('projectId', projectId);
+    return request<Run[]>(`${API_ROUTES.runs}?${query.toString()}`);
+  },
+  getRun: (runId: string) => request<Run>(API_ROUTES.run(runId)),
+  completeRun: (runId: string, summary?: string) => sendJson<Run>(API_ROUTES.runComplete(runId), 'POST', summary ? { summary } : {}),
+  cancelRun: (runId: string) => request<Run>(API_ROUTES.runCancel(runId), { method: 'POST' }),
+  terminalTicket: (runId: string) => sendJson<TerminalTicket>(API_ROUTES.terminalTicket, 'POST', { runId }),
+  listTokens: () => request<ApiToken[]>(API_ROUTES.tokens),
+  createToken: (name: string) => sendJson<CreatedApiToken>(API_ROUTES.tokens, 'POST', { name }),
+  deleteToken: (tokenId: string) => request<{ ok: true }>(API_ROUTES.token(tokenId), { method: 'DELETE' }),
+  integrationStatus: () => request<IntegrationStatus>(API_ROUTES.integrationStatus),
   listGroups: () => request<ProjectGroupSummary[]>(API_ROUTES.groups),
   createGroup: (input: ProjectGroupInput) => sendJson<ProjectGroup>(API_ROUTES.groups, 'POST', input),
   updateGroup: (groupId: string, patch: Partial<ProjectGroupInput>) =>
@@ -112,4 +141,8 @@ export function exportUrl(projectId: string) {
 
 export function errorMessage(error: unknown) {
   return error instanceof Error && error.message ? error.message : TOAST_COPY.genericError;
+}
+
+export function errorStatus(error: unknown) {
+  return error instanceof ApiError ? error.status : null;
 }

@@ -24,6 +24,25 @@
   --overlay: rgb(5 6 7 / 0.72);
   --glow-primary: rgb(34 211 238 / 0.06);
   --glow-secondary: rgb(129 140 248 / 0.05);
+  --term-background: #0c0d0f;
+  --term-foreground: #d7dae0;
+  --term-selection: rgb(34 211 238 / 0.22);
+  --term-black: #1d1f23;
+  --term-red: #f47a8f;
+  --term-green: #4fd1b5;
+  --term-yellow: #f5c45e;
+  --term-blue: #7aa2f7;
+  --term-magenta: #b29bf8;
+  --term-cyan: #22d3ee;
+  --term-white: #c9ccd3;
+  --term-bright-black: #5c616b;
+  --term-bright-red: #ff95a6;
+  --term-bright-green: #6ee7cf;
+  --term-bright-yellow: #fcd581;
+  --term-bright-blue: #9db8fb;
+  --term-bright-magenta: #c9b6fb;
+  --term-bright-cyan: #67e8f9;
+  --term-bright-white: #f2f3f5;
   color-scheme: dark;
 }
 
@@ -53,6 +72,7 @@
   --color-danger: var(--rose);
   --color-warning: var(--amber);
   --color-overlay: var(--overlay);
+  --color-terminal: var(--term-background);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }

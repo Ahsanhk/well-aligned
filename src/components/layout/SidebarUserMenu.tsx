@@ -1,18 +1,25 @@
 'use client';
 
-import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronsUpDown, LogOut, Settings } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Menu } from '@/components/ui/Menu';
+import { MenuDivider } from '@/components/ui/MenuDivider';
 import { MenuItem } from '@/components/ui/MenuItem';
 import { Spinner } from '@/components/ui/Spinner';
+import { ROUTES } from '@/constants/app';
 import { AUTH_COPY } from '@/constants/auth';
+import { SETTINGS_COPY } from '@/constants/claude';
 import { useSignOut } from '@/hooks/useSignOut';
 import { cn } from '@/lib/cn';
+import { useLayoutStore } from '@/store/layout';
 import { initials } from '@/lib/session-user';
 import type { SessionUser } from '@/types';
 
 export function SidebarUserMenu({ user }: { user: SessionUser }) {
   const { signOut, isSigningOut } = useSignOut();
+  const router = useRouter();
+  const closeDrawer = useLayoutStore((state) => state.closeDrawer);
 
   return (
     <Menu
@@ -39,6 +46,17 @@ export function SidebarUserMenu({ user }: { user: SessionUser }) {
       )}
     >
       {(close) => (
+        <>
+        <MenuItem
+          icon={<Settings size={14} />}
+          label={SETTINGS_COPY.title}
+          onSelect={() => {
+            close();
+            closeDrawer();
+            router.push(ROUTES.settings);
+          }}
+        />
+        <MenuDivider />
         <MenuItem
           icon={<LogOut size={14} />}
           label={AUTH_COPY.signOut}
@@ -48,6 +66,7 @@ export function SidebarUserMenu({ user }: { user: SessionUser }) {
             void signOut();
           }}
         />
+        </>
       )}
     </Menu>
   );

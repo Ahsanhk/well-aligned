@@ -2,6 +2,7 @@
 
 import type { KeyboardEvent } from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
+import { ClaudeTodoChip } from '@/components/claude/ClaudeTodoChip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { HiddenFileInput } from '@/components/ui/HiddenFileInput';
 import { IconButton } from '@/components/ui/IconButton';
@@ -16,6 +17,7 @@ import { cn } from '@/lib/cn';
 import { formatRelativeTime } from '@/lib/date';
 import { detailsPreview } from '@/lib/todo-preview';
 import { usePromptPanelStore } from '@/store/prompt-panel';
+import { useRunsStore } from '@/store/runs';
 import { selectSelectionMode, useSelectionStore } from '@/store/selection';
 import { useTodosStore } from '@/store/todos';
 import type { Todo } from '@/types';
@@ -41,6 +43,7 @@ export function TodoRow({ todo, meetingTitle }: Props) {
   const move = useTodosStore((state) => state.move);
   const moves = useTodoMoveOptions(todo);
   const openPrompt = usePromptPanelStore((state) => state.openFor);
+  const requestSend = useRunsStore((state) => state.requestSend);
   const expanded = useDisclosure();
   const editor = useDisclosure();
   const confirm = useDisclosure();
@@ -96,6 +99,7 @@ export function TodoRow({ todo, meetingTitle }: Props) {
                 {todo.title}
               </span>
               <PriorityIndicator priority={todo.priority} />
+              <ClaudeTodoChip todoId={todo.id} />
             </span>
             {preview && !expanded.isOpen && (
               <span className={cn('line-clamp-1 text-[13px]', isDone ? 'text-subtle/70' : 'text-muted')}>{preview}</span>
@@ -122,6 +126,7 @@ export function TodoRow({ todo, meetingTitle }: Props) {
             onEdit={editor.open}
             onAddScreenshots={openPicker}
             onGeneratePrompt={() => openPrompt([todo.id])}
+            onSendToClaude={(mode) => requestSend({ todoIds: [todo.id], mode, projectId: null })}
             onDelete={confirm.open}
             moveHeading={moves.heading}
             moveOptions={moves.options}

@@ -10,6 +10,8 @@ export const TABLES = {
   screenshots: 'screenshots',
   meetings: 'meetings',
   projectGroups: 'project_groups',
+  apiTokens: 'api_tokens',
+  runs: 'runs',
 } as const;
 
 export const MEETING_LIST_SELECT =

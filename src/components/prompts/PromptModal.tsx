@@ -1,11 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { CliInstallNotice } from '@/components/claude/CliInstallNotice';
+import { SendToClaudeButton } from '@/components/claude/SendToClaudeButton';
 import { Modal } from '@/components/ui/Modal';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { DEFAULT_PROMPT_VIEW, PROMPT_VIEW_OPTIONS } from '@/constants/prompt-views';
+import { useClaudeCli } from '@/hooks/useClaudeCli';
 import { usePromptGeneration } from '@/hooks/usePromptGeneration';
-import type { PromptView } from '@/types';
+import { useRepoReadiness } from '@/hooks/useRepoReadiness';
+import { useStartRun } from '@/hooks/useStartRun';
+import type { PromptView, RunMode } from '@/types';
 import { PromptComposer } from './PromptComposer';
 import { RepoPicker } from './RepoPicker';
 import { PromptResult } from './PromptResult';
@@ -29,6 +34,15 @@ export function PromptModal({ projectId, projectOptions, todoIds, onClose }: Pro
   const needsPicker = projectId === null;
   const count = generation.todos.length;
   const isLoading = generation.status === 'loading';
+  const readiness = useRepoReadiness(repoId);
+  const { startRun, isStarting } = useStartRun();
+  const cli = useClaudeCli();
+
+  const sendPrompt = async (mode: RunMode) => {
+    if (!readiness.isReady || !generation.text.trim()) return;
+    const run = await startRun({ projectId: repoId, todoIds, mode, prompt: generation.text });
+    if (run) onClose();
+  };
 
   return (
     <Modal
@@ -64,7 +78,23 @@ export function PromptModal({ projectId, projectOptions, todoIds, onClose }: Pro
               onTextChange={generation.setText}
               warning={generation.warning}
               isEdited={generation.isEdited}
+              actionsHint={readiness.reason}
+              actions={
+                <SendToClaudeButton
+                  size="lg"
+                  portal
+                  showLabel
+                  onSend={(mode) => void sendPrompt(mode)}
+                  disabled={!readiness.isReady || !generation.text.trim()}
+                  disabledReason={readiness.reason}
+                  isBusy={isStarting}
+                  terminalUnavailable={cli.cliMissing}
+                />
+              }
             />
+          )}
+          {!isLoading && generation.prompt && cli.cliMissing && (
+            <CliInstallNotice isChecking={cli.isChecking} onCheck={() => void cli.check()} showQueueHint />
           )}
         </div>
       )}
