@@ -14,6 +14,7 @@ export const ROUTES = {
   projectTab: (projectId: string, tab: string) => `/projects/${projectId}?tab=${tab}`,
   projectTodo: (projectId: string, todoId: string) => `/projects/${projectId}#${todoAnchorId(todoId)}`,
   meeting: (projectId: string, meetingId: string) => `/projects/${projectId}/meetings/${meetingId}`,
+  settings: '/settings',
   group: (groupId: string) => `/groups/${groupId}`,
   groupTab: (groupId: string, tab: string) => `/groups/${groupId}?tab=${tab}`,
   groupTodo: (groupId: string, todoId: string) => `/groups/${groupId}#${todoAnchorId(todoId)}`,

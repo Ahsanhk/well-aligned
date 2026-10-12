@@ -26,13 +26,20 @@ interface Props {
   children: (close: () => void) => ReactNode;
 }
 
-function fixedPosition(anchor: HTMLElement): CSSProperties {
+function fixedPosition(anchor: HTMLElement, panelHeight: number): CSSProperties {
   const rect = anchor.getBoundingClientRect();
   const left = Math.min(
     Math.max(VIEWPORT_MARGIN_PX, rect.right - MENU_WIDTH_PX),
     window.innerWidth - MENU_WIDTH_PX - VIEWPORT_MARGIN_PX,
   );
-  return { position: 'fixed', top: rect.bottom + MENU_OFFSET_PX, left, width: MENU_WIDTH_PX };
+  const spaceBelow = window.innerHeight - rect.bottom - MENU_OFFSET_PX - VIEWPORT_MARGIN_PX;
+  const spaceAbove = rect.top - MENU_OFFSET_PX - VIEWPORT_MARGIN_PX;
+  const opensUp = panelHeight > spaceBelow && spaceAbove > spaceBelow;
+  const maxHeight = Math.max(opensUp ? spaceAbove : spaceBelow, 0);
+  const base: CSSProperties = { position: 'fixed', left, width: MENU_WIDTH_PX, maxHeight, overflowY: 'auto' };
+  return opensUp
+    ? { ...base, bottom: window.innerHeight - rect.top + MENU_OFFSET_PX }
+    : { ...base, top: rect.bottom + MENU_OFFSET_PX };
 }
 
 export function Menu({ trigger, children, placement = 'bottom-end', portal = false, className }: Props) {
@@ -46,15 +53,21 @@ export function Menu({ trigger, children, placement = 'bottom-end', portal = fal
 
   useLayoutEffect(() => {
     if (!isOpen || !portal || !ref.current) return;
-    setStyle(fixedPosition(ref.current));
+    setStyle({ ...fixedPosition(ref.current, 0), visibility: 'hidden' });
     const onScroll = () => close();
     window.addEventListener('scroll', onScroll, true);
     window.addEventListener('resize', onScroll);
     return () => {
+      setStyle(undefined);
       window.removeEventListener('scroll', onScroll, true);
       window.removeEventListener('resize', onScroll);
     };
   }, [isOpen, portal, close]);
+
+  useLayoutEffect(() => {
+    if (!isOpen || !portal || !ref.current || !panelRef.current || !style || style.visibility !== 'hidden') return;
+    setStyle(fixedPosition(ref.current, panelRef.current.scrollHeight));
+  }, [isOpen, portal, style]);
 
   const panel = (
     <div

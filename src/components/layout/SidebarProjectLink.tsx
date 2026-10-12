@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { RunPulseDot } from '@/components/claude/RunPulseDot';
 import { ProjectActionsMenu } from '@/components/projects/ProjectActionsMenu';
 import { ROUTES } from '@/constants/app';
 import { PROJECT_COLOR_CLASSES } from '@/constants/project-colors';
+import { useActiveRuns } from '@/hooks/useActiveRuns';
 import { cn } from '@/lib/cn';
 import type { ProjectSummary } from '@/types';
 import { SidebarCounts } from './SidebarCounts';
@@ -18,6 +20,7 @@ interface Props {
 export function SidebarProjectLink({ project, isActive, indented = false, onNavigate }: Props) {
   const colors = PROJECT_COLOR_CLASSES[project.color];
   const highPriority = project.highPriorityOpenCount ?? 0;
+  const hasActiveRun = useActiveRuns().some((run) => run.projectId === project.id);
 
   return (
     <div
@@ -38,6 +41,7 @@ export function SidebarProjectLink({ project, isActive, indented = false, onNavi
       >
         <span className={cn('h-2 w-2 shrink-0 rounded-full', colors.dot, isActive && colors.glow)} />
         <span className="min-w-0 flex-1 truncate">{project.name}</span>
+        {hasActiveRun && <RunPulseDot />}
         <SidebarCounts open={project.openCount} backlog={project.backlogOpenCount ?? 0} urgent={highPriority > 0} />
       </Link>
       <ProjectActionsMenu

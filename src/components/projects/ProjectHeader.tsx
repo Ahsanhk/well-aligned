@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { FolderGit2, FolderTree, Layers, Pencil } from 'lucide-react';
+import { ActiveRunButton } from '@/components/claude/ActiveRunButton';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -44,6 +45,7 @@ export function ProjectHeader({ project }: { project: Project }) {
       }
       actions={
         <>
+          <ActiveRunButton projectId={project.id} />
           <Button variant="secondary" onClick={() => openProjectForm(project)}>
             <Pencil size={14} />
             Edit

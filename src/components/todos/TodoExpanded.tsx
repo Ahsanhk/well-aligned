@@ -1,3 +1,4 @@
+import { ClaudeNote } from '@/components/claude/ClaudeNote';
 import { SavedPrompt } from '@/components/prompts/SavedPrompt';
 import { ScreenshotManager } from '@/components/screenshots/ScreenshotManager';
 import type { Todo } from '@/types';
@@ -14,6 +15,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function TodoExpanded({ todo }: { todo: Todo }) {
   return (
     <div className="animate-fade-in flex flex-col gap-4 px-3 pt-1 pb-4 pl-[3.25rem] sm:pl-[3.75rem]">
+      <ClaudeNote todoId={todo.id} />
       <Section title="Details">
         {todo.details ? (
           <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted">{todo.details}</p>

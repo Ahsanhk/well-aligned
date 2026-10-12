@@ -1,5 +1,6 @@
 'use client';
 
+import { SendToClaudeHost } from '@/components/claude/SendToClaudeHost';
 import { MeetingsPanel } from '@/components/meetings/MeetingsPanel';
 import { PromptModalHost } from '@/components/prompts/PromptModalHost';
 import { SelectionBar } from '@/components/todos/SelectionBar';
@@ -34,6 +35,7 @@ export function WorkspaceBody({ owner, tab, sharedGroup, promptProjectId, prompt
         <MeetingsPanel key={key} owner={owner} />
       </div>
       <PromptModalHost projectId={promptProjectId} projectOptions={promptProjectOptions} />
+      <SendToClaudeHost projectId={promptProjectId} projectOptions={promptProjectOptions} />
     </>
   );
 }

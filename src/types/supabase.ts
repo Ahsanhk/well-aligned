@@ -1,5 +1,6 @@
 import type { MeetingStatus, SuggestedTodo, TranscriptSegment } from './meeting';
 import type { ProjectColor } from './project';
+import type { RunFileChange, RunMode, RunStatus, RunTodoProgress } from './run';
 import type { GeneratedPrompt } from './prompt';
 import type { TodoCategory, TodoOrigin, TodoPriority, TodoStatus } from './todo';
 
@@ -97,6 +98,37 @@ export type ScreenshotInsert = Pick<ScreenshotRow, 'todo_id' | 'storage_path' | 
 export type MeetingInsert = Pick<MeetingRow, 'id' | 'title' | 'meeting_date' | 'video_name' | 'video_size' | 'status'> & { user_id: string } &
   Partial<Pick<MeetingRow, 'project_id' | 'group_id' | 'error' | 'summary' | 'transcript' | 'suggestions' | 'model' | 'created_at' | 'updated_at'>>;
 
+export type ApiTokenRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  token_hash: string;
+  last_used_at: string | null;
+  created_at: string;
+};
+
+export type ApiTokenInsert = Pick<ApiTokenRow, 'user_id' | 'name' | 'token_hash'>;
+
+export type ApiTokenUpdate = Pick<ApiTokenRow, 'last_used_at'>;
+
+export type RunRow = {
+  id: string;
+  user_id: string;
+  project_id: string;
+  mode: RunMode;
+  status: RunStatus;
+  todo_ids: string[];
+  progress: RunTodoProgress[];
+  summary: string | null;
+  files_changed: RunFileChange[];
+  started_at: string;
+  ended_at: string | null;
+  updated_at: string;
+};
+
+export type RunInsert = Pick<RunRow, 'id' | 'user_id' | 'project_id' | 'mode' | 'status' | 'todo_ids' | 'progress'> &
+  Partial<Pick<RunRow, 'summary' | 'files_changed' | 'started_at' | 'ended_at' | 'updated_at'>>;
+
 export type ProfileRow = {
   id: string;
   full_name: string;
@@ -129,6 +161,25 @@ export type SupabaseSchema = {
         ]
       >;
       project_groups: Table<ProjectGroupRow, ProjectGroupInsert, []>;
+      api_tokens: {
+        Row: ApiTokenRow;
+        Insert: ApiTokenInsert;
+        Update: ApiTokenUpdate;
+        Relationships: [];
+      };
+      runs: Table<
+        RunRow,
+        RunInsert,
+        [
+          {
+            foreignKeyName: 'runs_project_id_fkey';
+            columns: ['project_id'];
+            isOneToOne: false;
+            referencedRelation: 'projects';
+            referencedColumns: ['id'];
+          },
+        ]
+      >;
       profiles: Table<ProfileRow, Pick<ProfileRow, 'id' | 'full_name' | 'email'>, []>;
       todos: Table<
         TodoRow,

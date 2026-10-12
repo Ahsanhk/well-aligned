@@ -7,7 +7,8 @@ import { useTodosStore } from '@/store/todos';
 import { toastError, toastSuccess } from '@/store/toast';
 import type { GeneratedPrompt, PromptGenerationStatus } from '@/types';
 
-export function usePromptGeneration(projectId: string, todoIds: string[]) {
+export function usePromptGeneration(projectId: string, todoIds: string[], options: { silent?: boolean } = {}) {
+  const { silent = false } = options;
   const allTodos = useTodosStore((state) => state.todos);
   const setPrompt = useTodosStore((state) => state.setPrompt);
   const todos = useMemo(() => allTodos.filter((todo) => todoIds.includes(todo.id)), [allTodos, todoIds]);
@@ -30,14 +31,14 @@ export function usePromptGeneration(projectId: string, todoIds: string[]) {
       setWarning(response.warning);
       setStatus('done');
       if (response.todoIds.length === 1) setPrompt(response.todoIds[0], response.prompt);
-      toastSuccess(TOAST_COPY.promptGenerated);
+      if (!silent) toastSuccess(TOAST_COPY.promptGenerated);
     } catch (caught) {
       const message = errorMessage(caught);
       setError(message);
       setStatus('error');
       toastError(message);
     }
-  }, [projectId, todoIds, extraInstructions, setPrompt]);
+  }, [projectId, todoIds, extraInstructions, setPrompt, silent]);
 
   return {
     todos,
